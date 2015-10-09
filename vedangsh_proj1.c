@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	int CliLen=0;
 	int i;
 	char buf[1000];							//1000 bytes buffer as mentioned in the project document
+	int RecvMsgSz;
 	//Create Socket
 		if(argc!=2)
 		{
@@ -71,7 +72,25 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
+					if(RecvMsgSz=recv(CliSock,buf,1000,0)<0)
+					{
+						perror("\nReceive fail");
+					}
+					else
+					{
+						if(RecvMsgSz==0)
+						{
+							printf("\nConnection closed");
+						}
+						else
+						{
+							printf("\nMessage received: %d bytes",RecvMsgSz);
+							printf("\nMessage %s",buf);
 
+						}
+
+					}
+					close(CliSock);
 				}
 			}
 
