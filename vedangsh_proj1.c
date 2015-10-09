@@ -18,7 +18,9 @@ int main(int argc, char *argv[])
 	struct sockaddr_in CliAddr;				//Structure for client address
 	char choice[25];
 	unsigned short port;
+	int CliLen=0;
 	int i;
+	char buf=1000;							//1000 bytes buffer as mentioned in the project document
 	//Create Socket
 		if(argc!=2)
 		{
@@ -45,7 +47,33 @@ int main(int argc, char *argv[])
 			SAddr.sin_addr.s_addr=htonl(INADDR_ANY);	//Assigning values to structaddr_in
 			
 			//Bind port number to IP addr
-			if(bind(SerSock,(struct sockaddr *) &SAddr))
+			if(bind(SerSock,(struct sockaddr *) &SAddr, sizeof(SAddr))<0)
+			{
+				perror("Binding failed.");
+				exit(1);
+			}
+
+
+			//Listen to the port
+			if(listen(SerSock,5)<0)
+			{
+				perror("Listening failed");
+				exit(1);
+			}
+			
+			//Accept phase
+			for(;;)
+			{
+				CliLen=sizeof(CliAddr);
+				if(CliSock=accept(SerSock,(struct sockaddr *) &SAddr,CliLen)<0)
+				{
+				 	perror("Acceptance failed");
+				}
+				else
+				{
+
+				}
+			}
 
 		}
 		else
