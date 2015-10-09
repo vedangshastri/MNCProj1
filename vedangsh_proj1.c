@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	unsigned short port;
 	int CliLen=0;
 	int i;
-	char buf=1000;							//1000 bytes buffer as mentioned in the project document
+	char buf[1000];							//1000 bytes buffer as mentioned in the project document
 	//Create Socket
 		if(argc!=2)
 		{
