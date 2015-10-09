@@ -3,6 +3,7 @@
 #include<string.h>
 #include<sys/types.h>
 #include<sys/socket.h>
+#include<unistd.h>
 
 #include<netinet/in.h>
 
@@ -18,12 +19,13 @@ int main(int argc, char *argv[])
 	struct sockaddr_in CliAddr;				//Structure for client address
 	char choice[25];
 	unsigned short port;
-	int CliLen=0;
+	int CliLen;
 	int i;
 	char buf[1000];							//1000 bytes buffer as mentioned in the project document
 	int RecvMsgSz;
 	//Create Socket
-		if(argc!=2)
+		
+		if(argc!=3)
 		{
 			perror("Number of arguments should be 2... Try again!!");
 			exit(1);
@@ -66,7 +68,8 @@ int main(int argc, char *argv[])
 			for(;;)
 			{
 				CliLen=sizeof(CliAddr);
-				if(CliSock=accept(SerSock,(struct sockaddr *) &SAddr,CliLen)<0)
+				
+				if((CliSock=accept(SerSock,(struct sockaddr*) &SAddr, &CliLen))<0)
 				{
 				 	perror("Acceptance failed");
 				}
