@@ -58,7 +58,8 @@ int main(int argc, char *argv[])
 				exit(1);
 			}
 			printf("\nBinding completed");
-
+			for(;;)
+			{
 			//Listen to the port
 			if(listen(SerSock,5)<0)
 			{
@@ -68,17 +69,16 @@ int main(int argc, char *argv[])
 			printf("\nListening completed");
 			
 			//Accept phase
-			for(;;)
-			{
+			
 				CliLen=sizeof(CliAddr);
 				
-				if((CliSock=accept(SerSock,(struct sockaddr*) &SAddr, &CliLen))<0)
+				if((CliSock=accept(SerSock,(struct sockaddr*) &CliAddr, &CliLen))<0)
 				{
 				 	perror("Acceptance failed");
 				}
 				else
 				{
-					if( (RecvMsgSz=recv(CliSock,buf,100,0) )<0)
+					if( (RecvMsgSz=recv(CliSock,buf,10,0) )<0)
 					{
 						perror("\nReceive fail");
 					}
@@ -90,10 +90,11 @@ int main(int argc, char *argv[])
 						}
 						else
 						{
-							printf("\nMessage received: %d bytes",RecvMsgSz);
-							printf("\nMessage %s",buf);
+							printf("\nMessage received: %d bytes from %d",RecvMsgSz,inet_ntoa(CliAddr.sin_addr.s_addr));
+							
 
 						}
+						printf("\nMessage %s",buf);
 
 					}
 					close(CliSock);
@@ -105,6 +106,8 @@ int main(int argc, char *argv[])
 		{
 			if(strcasecmp(argv[1],"c")==0)
 			{
+				while(1)
+				{
 				CliSock=socket(AF_INET,SOCK_STREAM,0);
 						if(CliSock<0)
 						{
@@ -127,8 +130,7 @@ int main(int argc, char *argv[])
 
 
 
-				while(1)
-				{
+				
 					printf("\nClient side: Enter message");
 					scanf("%s",buf);
 
