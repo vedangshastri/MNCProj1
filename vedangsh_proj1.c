@@ -50,14 +50,14 @@ int main(int argc, char *argv[])
 			SAddr.sin_family=AF_INET;
 			SAddr.sin_port=port;
 			SAddr.sin_addr.s_addr=htonl(INADDR_ANY);	//Assigning values to structaddr_in
-			printf()
+			
 			//Bind port number to IP addr
 			if(bind(SerSock,(struct sockaddr *) &SAddr, sizeof(SAddr))<0)
 			{
 				perror("Binding failed.");
 				exit(1);
 			}
-
+			printf("\nBinding completed");
 
 			//Listen to the port
 			if(listen(SerSock,5)<0)
@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 				perror("Listening failed");
 				exit(1);
 			}
+			printf("\nListening completed");
 			
 			//Accept phase
 			for(;;)
@@ -77,12 +78,12 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					if(RecvMsgSz=recv(CliSock,buf,1000,0)<0)
+					if( (RecvMsgSz=recv(CliSock,buf,100,0) )<0)
 					{
 						perror("\nReceive fail");
 					}
 					else
-					{
+					{	printf("\nAttemptReceiving.....%d",RecvMsgSz);
 						if(RecvMsgSz==0)
 						{
 							printf("\nConnection closed");
@@ -129,9 +130,9 @@ int main(int argc, char *argv[])
 				while(1)
 				{
 					printf("\nClient side: Enter message");
-					scanf(%s,&buf);
+					scanf("%s",buf);
 
-					if(connect(CliSock,,sizeof(SAddr))<0)
+					if(connect(CliSock,(struct sockaddr *) &SAddr,sizeof(SAddr))<0)
 					{
 						perror("\nConnection failed");
 						exit(1);
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
 					}
 
 					printf("\n%s\n",buf);
-					close CliSock;
+					close(CliSock);
 			/*printf("\nEnter command ");
 			scanf("%s",choice);
 					
@@ -172,7 +173,7 @@ int main(int argc, char *argv[])
 						if(strcmp(ch,"quit")==0)
 							if(strcmp(ch,"get")==0)
 								if(strcmp(ch,"put")==0)
-									if(strcmp(ch,"sync")==0)*/
+									if(strcmp(ch,"sync")==0)
 						
 						
 				else
@@ -180,7 +181,7 @@ int main(int argc, char *argv[])
 					printf("\nBad Command... Type 'Help' for command list");
 				
 
-				}	
+				}*/	
 				}
 			}
 			else
@@ -196,7 +197,9 @@ int main(int argc, char *argv[])
 	void CREATOR()
 	{
 		
-		printf("\n");
+		printf("\n\n\t\t\tName: Vedang Shastri");
+		printf("\n\t\t\tUBIT Name: vedangsh");
+		printf("\n\t\t\tUBemail: vedangsh@buffalo.edu");
 	}
 	void HELPF()
 	{
