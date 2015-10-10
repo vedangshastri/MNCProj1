@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 			SAddr.sin_family=AF_INET;
 			SAddr.sin_port=port;
 			SAddr.sin_addr.s_addr=htonl(INADDR_ANY);	//Assigning values to structaddr_in
-			printf("%d",
+			
 			//Bind port number to IP addr
 			if(bind(SerSock,(struct sockaddr *) &SAddr, sizeof(SAddr))<0)
 			{
