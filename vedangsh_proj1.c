@@ -3,6 +3,7 @@
 #include<string.h>
 #include<sys/types.h>
 #include<sys/socket.h>
+#include<unistd.h>
 
 #include<netinet/in.h>
 
@@ -18,12 +19,15 @@ int main(int argc, char *argv[])
 	struct sockaddr_in CliAddr;				//Structure for client address
 	char choice[25];
 	unsigned short port;
-	int CliLen=0;
+	int CliLen;
 	int i;
 	char buf[1000];							//1000 bytes buffer as mentioned in the project document
 	int RecvMsgSz;
+	int MsgLen;
+
 	//Create Socket
-		if(argc!=2)
+		
+		if(argc!=3)
 		{
 			perror("Number of arguments should be 2... Try again!!");
 			exit(1);
@@ -46,7 +50,7 @@ int main(int argc, char *argv[])
 			SAddr.sin_family=AF_INET;
 			SAddr.sin_port=port;
 			SAddr.sin_addr.s_addr=htonl(INADDR_ANY);	//Assigning values to structaddr_in
-			
+			printf()
 			//Bind port number to IP addr
 			if(bind(SerSock,(struct sockaddr *) &SAddr, sizeof(SAddr))<0)
 			{
@@ -66,7 +70,8 @@ int main(int argc, char *argv[])
 			for(;;)
 			{
 				CliLen=sizeof(CliAddr);
-				if(CliSock=accept(SerSock,(struct sockaddr *) &SAddr,CliLen)<0)
+				
+				if((CliSock=accept(SerSock,(struct sockaddr*) &SAddr, &CliLen))<0)
 				{
 				 	perror("Acceptance failed");
 				}
@@ -114,13 +119,32 @@ int main(int argc, char *argv[])
 						CliAddr.sin_port=port;
 						CliAddr.sin_addr.s_addr=htonl(INADDR_ANY);
 
+						
+						SAddr.sin_family=AF_INET;
+						SAddr.sin_port=port;
+						SAddr.sin_addr.s_addr=CliAddr.sin_addr.s_addr;
+
+
+
 				while(1)
 				{
-					printf("\nClient side: ");
-				
+					printf("\nClient side: Enter message");
+					scanf(%s,&buf);
 
-			
-			printf("\nEnter command ");
+					if(connect(CliSock,,sizeof(SAddr))<0)
+					{
+						perror("\nConnection failed");
+						exit(1);
+					}
+					MsgLen=sizeof(buf);
+					if(send(CliSock,buf,sizeof(buf),0)<0)
+					{
+						perror("Sending failed");
+					}
+
+					printf("\n%s\n",buf);
+					close CliSock;
+			/*printf("\nEnter command ");
 			scanf("%s",choice);
 					
 
@@ -135,7 +159,7 @@ int main(int argc, char *argv[])
 					if(strcmp(choice,"creator")==0)
 						CREATOR();
 					
-					/*if(strcmp(choice,"display")==0)
+					if(strcmp(choice,"display")==0)
 						DISPLAY();
 
 					if(strcmp(choice,"register")==0)
