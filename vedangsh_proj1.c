@@ -1,10 +1,12 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<netdb.h>
 #include<string.h>
 #include<sys/types.h>
-#include<sys/socket.h>
+#include<sys/socket.h>//inet_ntoa()
+#include<netinet/in.h>//inet_ntoa()
 #include<unistd.h>
-
+#include<arpa/inet.h> //inet_ntoa()
 #include<netinet/in.h>
 
 /*Function Declarations*/
@@ -21,7 +23,7 @@ int SerSock, CliSock;					//Server and CLient Descriptors
 	char comm[30],para1[20],para2[20];							//1000 bytes buffer as mentioned in the project document
 	int RecvMsgSz;
 	int MsgLen;
-
+	char ClAddr[4];
 int main(int argc, char *argv[])
 {
 	
@@ -96,8 +98,9 @@ int main(int argc, char *argv[])
 						}
 						else
 						{
-							printf("\nMessage received: %d bytes from %d",RecvMsgSz,inet_ntoa(CliAddr.sin_addr.s_addr));
-							
+							strcpy(ClAddr,inet_ntoa(CliAddr.sin_addr));
+							printf("\nMessage received: %d bytes from %s",RecvMsgSz,ClAddr);
+							printf("\n");
 
 						}
 						printf("\nMessage %s",buf);
@@ -121,7 +124,7 @@ int main(int argc, char *argv[])
 							exit(1);
 
 						}
-						printf("Socket Created");
+						printf("Socket Created\n");
 						memset(&CliAddr,0,sizeof(CliAddr));//Setting 0s thorughout
 
 						port=atoi(argv[2]);
@@ -129,10 +132,32 @@ int main(int argc, char *argv[])
 						CliAddr.sin_port=port;
 						CliAddr.sin_addr.s_addr=htonl(INADDR_ANY);
 
+						  int i;
+   				 struct hostent *he;
+    				struct in_addr **addr_list;
+						char s[30];
+						scanf("%s",s);
+   
+    if ((he = gethostbyname(s)) == NULL) {  // get the host info
+        herror("gethostbyname");
+        return 2;
+    }
+
+    // print information about this host:
+    printf("Official name is: %s\n", he->h_name);
+    printf("    IP addresses: ");
+    addr_list = (struct in_addr **)he->h_addr_list;
+    for(i = 0; addr_list[i] != NULL; i++) {
+        printf("%s ", inet_ntoa(*addr_list[i]));
+    }
+	printf("\n");
+	char SeAddr[4];
+	strcpy(SeAddr,inet_ntoa(*addr_list[0]));
+	printf("\n%s\n",SeAddr);
 						
 						SAddr.sin_family=AF_INET;
 						SAddr.sin_port=port;
-						SAddr.sin_addr.s_addr=CliAddr.sin_addr.s_addr;
+						inet_aton(SeAddr,&SAddr.sin_addr);
 
 
 
@@ -212,7 +237,7 @@ int main(int argc, char *argv[])
 					if(strcmp(choice,"display")==0)
 						DISPLAY();*/
 
-					if(strcmp(choice,"register")==0)
+					//if(strcmp(choice,"register")==0)
 						
 					/*if(strcmp(choice,"connect")==0)
 						CONNECT();
