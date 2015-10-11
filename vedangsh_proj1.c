@@ -10,20 +10,26 @@
 /*Function Declarations*/
 void HELPF();
 void CREATOR();
-
-
-int main(int argc, char *argv[])
-{
-	int SerSock, CliSock;					//Server and CLient Descriptors
+int SerSock, CliSock;					//Server and CLient Descriptors
 	struct sockaddr_in SAddr;				//Structure for address of Self
 	struct sockaddr_in CliAddr;				//Structure for client address
 	char choice[25];
 	unsigned short port;
-	int CliLen;
-	int i;
-	char buf[1000];							//1000 bytes buffer as mentioned in the project document
+	int CliLen,commLen;
+	int i,spc_count=0,k;
+	char buf[1000];
+	char comm[30],para1[20],para2[20];							//1000 bytes buffer as mentioned in the project document
 	int RecvMsgSz;
 	int MsgLen;
+
+int main(int argc, char *argv[])
+{
+	
+
+
+	memset(comm,0,30);
+	memset(para1,0,20);
+	memset(para2,0,20);
 
 	//Create Socket
 		
@@ -148,26 +154,67 @@ int main(int argc, char *argv[])
 					printf("\n%s\n",buf);
 					close(CliSock);
 			/*printf("\nEnter command ");
-			scanf("%s",choice);
+			scanf("%[^\n]s",comm);*/
+
 					
+					scanf("%[^\n]s",comm);
+	commLen=strlen(comm);
+	
+   	for(i=0;i<=strlen(comm);i++)
+						{comm[i]=tolower(comm[i]);}
+					for(i=0;i<strlen(comm);i++)
+					{
+						if(spc_count==0)
+						{
+						while(comm[i]==' ')
+						{
+							spc_count++;
+							strncpy(choice,comm,i);
+							k=i+1;
+							
+							break;
+						}
+					  	
+						}
+						else
+						
+					    {
+						while(comm[i]==' ')
+							{	
+								spc_count++;
+								strncpy(para1,comm+k,i-k);
+								
+								strncpy(para2,comm+i+1,j-i-1);
+								break;
+							}
 
+						}
+					}
+					if(spc_count==0)
+					{
+						strcpy(choice,comm);
+					}
+					else
+					{if(spc_count==1)
+						strncpy(para1,comm+k,i-k);
 
-					for(i=0;i<=strlen(choice);i++)
-						choice[i]=tolower(choice[i]);
+					}
+
+						
 
 					if(strcmp(choice,"help")==0)
 							HELPF();
 						
 					
-					if(strcmp(choice,"creator")==0)
+					/*if(strcmp(choice,"creator")==0)
 						CREATOR();
 					
 					if(strcmp(choice,"display")==0)
-						DISPLAY();
+						DISPLAY();*/
 
 					if(strcmp(choice,"register")==0)
 						CREATE();
-					if(strcmp(choice,"connect")==0)
+					/*if(strcmp(choice,"connect")==0)
 						CONNECT();
 					if(strcmp(ch,"list")==0)
 						
@@ -202,6 +249,11 @@ int main(int argc, char *argv[])
 		printf("\n\n\t\t\tName: Vedang Shastri");
 		printf("\n\t\t\tUBIT Name: vedangsh");
 		printf("\n\t\t\tUBemail: vedangsh@buffalo.edu");
+	}
+	void REGISTER()
+	{
+
+
 	}
 	void HELPF()
 	{
