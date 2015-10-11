@@ -21,6 +21,9 @@ int SerSock, CliSock;					//Server and CLient Descriptors
 	char comm[30],para1[20],para2[20];							//1000 bytes buffer as mentioned in the project document
 	int RecvMsgSz;
 	int MsgLen;
+	 int i;
+    struct hostent *he;
+    struct in_addr **addr_list;
 
 int main(int argc, char *argv[])
 {
@@ -112,47 +115,7 @@ int main(int argc, char *argv[])
 		{
 			if(strcasecmp(argv[1],"c")==0)
 			{
-				while(1)
-				{
-				CliSock=socket(AF_INET,SOCK_STREAM,0);
-						if(CliSock<0)
-						{
-							perror("Failed to create client socket");
-							exit(1);
-
-						}
-						printf("Socket Created");
-						memset(&CliAddr,0,sizeof(CliAddr));//Setting 0s thorughout
-
-						port=atoi(argv[2]);
-						CliAddr.sin_family=AF_INET;
-						CliAddr.sin_port=port;
-						CliAddr.sin_addr.s_addr=htonl(INADDR_ANY);
-
-						
-						SAddr.sin_family=AF_INET;
-						SAddr.sin_port=port;
-						SAddr.sin_addr.s_addr=CliAddr.sin_addr.s_addr;
-
-
-
 				
-					printf("\nClient side: Enter message");
-					scanf("%s",buf);
-
-					if(connect(CliSock,(struct sockaddr *) &SAddr,sizeof(SAddr))<0)
-					{
-						perror("\nConnection failed");
-						exit(1);
-					}
-					MsgLen=sizeof(buf);
-					if(send(CliSock,buf,sizeof(buf),0)<0)
-					{
-						perror("Sending failed");
-					}
-
-					printf("\n%s\n",buf);
-					close(CliSock);
 			/*printf("\nEnter command ");
 			scanf("%[^\n]s",comm);*/
 
@@ -252,7 +215,69 @@ int main(int argc, char *argv[])
 	}
 	void REGISTER()
 	{
+		while(1)
+				{
+				CliSock=socket(AF_INET,SOCK_STREAM,0);
+						if(CliSock<0)
+						{
+							perror("Failed to create client socket");
+							exit(1);
 
+						}
+						printf("Socket Created");
+						memset(&CliAddr,0,sizeof(CliAddr));//Setting 0s thorughout
+
+						port=atoi(argv[2]);
+						CliAddr.sin_family=AF_INET;
+						CliAddr.sin_port=port;
+						CliAddr.sin_addr.s_addr=htonl(INADDR_ANY);
+
+						int main(int argc, char *argv[])
+
+   
+
+    if (para1=='0') {
+        perror("usage: hostname\n");
+        return 1;
+    }
+
+    if ((he = gethostbyname(para1) == NULL) {  // get the host info
+        herror("gethostbyname");
+        return 2;
+    }
+
+    // print information about this host:
+    printf("Official name is: %s\n", he->h_name);
+    printf("    IP addresses: ");
+    addr_list = (struct in_addr **)he->h_addr_list;
+    for(i = 0; addr_list[i] != NULL; i++) {
+        printf("%s ", inet_ntoa(*addr_list[i]));
+    }
+    printf("\n");
+						
+						SAddr.sin_family=AF_INET;
+						SAddr.sin_port=para2;
+						SAddr.sin_addr.s_addr=*addr_list[0];
+
+
+
+				
+					printf("\nClient side: Enter message");
+					scanf("%s",buf);
+
+					if(connect(CliSock,(struct sockaddr *) &SAddr,sizeof(SAddr))<0)
+					{
+						perror("\nConnection failed");
+						exit(1);
+					}
+					MsgLen=sizeof(buf);
+					if(send(CliSock,buf,sizeof(buf),0)<0)
+					{
+						perror("Sending failed");
+					}
+
+					printf("\n%s\n",buf);
+					close(CliSock);
 
 	}
 	void HELPF()
