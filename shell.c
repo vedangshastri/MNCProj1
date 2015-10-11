@@ -30,7 +30,8 @@ int main()
 						
 					    {
 						while(comm[i]==' ')
-							{
+							{	
+								spc_count++;
 								strncpy(para1,comm+k,i-k);
 								
 								strncpy(para2,comm+i+1,j-i-1);
@@ -38,6 +39,15 @@ int main()
 							}
 
 						}
+					}
+					if(spc_count==0)
+					{
+						strcpy(choice,comm);
+					}
+					else
+					{if(spc_count==1)
+						strncpy(para1,comm+k,i-k);
+
 					}
                     printf("\n%s_%s_%s\n",choice,para1,para2);
 }
