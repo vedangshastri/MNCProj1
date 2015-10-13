@@ -18,6 +18,8 @@
 		unsigned short p_no;
 		unsigned short c;  //Connected to the server
 	};
+	struct list lst[5];
+	void REGISTER();
 	void HELPF();
 	void CREATOR();
 	int SerSock, CliSock;					//Server and CLient Descriptors
@@ -28,11 +30,62 @@
 		int CliLen,commLen;
 		int i,spc_count=0,k;
 		char buf[1000];
+		char SendBuff[100],RecMsg[1000];
 		char comm[40],para1[20],para2[20];							//1000 bytes buffer as mentioned in the project document
 		int RecvMsgSz;
-		int MsgLen;
+		int MsgLen,lcount;
 		char ClAddr[4];
 		void DISPLAY(struct in_addr Addr,unsigned short port);
+		int i;
+	   				 		struct hostent *he;
+	    					struct in_addr **addr_list;
+							char s[30];
+							
+	   	void command(char cmd[])
+	   	{
+	   		commLen=strlen(cmd);
+		
+	   	for(i=0;i<=strlen(cmd);i++)
+							{cmd[i]=tolower(cmd[i]);}
+						for(i=0;i<strlen(cmd);i++)
+						{
+							if(spc_count==0)
+							{
+							while(cmd[i]==' ')
+							{
+								spc_count++;
+								strncpy(choice,cmd,i);
+								k=i+1;
+								
+								break;
+							}
+						  	
+							}
+							else
+							
+						    {
+							while(cmd[i]==' ')
+								{	
+									spc_count++;
+									strncpy(para1,cmd+k,i-k);
+									
+									strncpy(para2,cmd+i+1,commLen-i-1);
+									break;
+								}
+
+							}
+						}
+						if(spc_count==0)
+						{
+							strcpy(choice,cmd);
+						}
+						else
+						{if(spc_count==1)
+							strncpy(para1,cmd+k,i-k);
+
+						}
+						spc_count=0;
+	   	}
 	int main(int argc, char *argv[])
 	{
 		
@@ -42,6 +95,11 @@
 		memset(para1,0,20);
 		memset(para2,0,20);
 
+						lst[0].id=1;
+						strcpy(lst[0].hostname,"timberlake.cse.buffalo.edu");
+						lst[0].p_no=3430;
+						lst[0].c=1;
+		
 		//Create Socket
 			
 			if(argc!=3)
@@ -95,7 +153,7 @@
 					}
 					else
 					{
-						if( (RecvMsgSz=recv(CliSock,buf,10,0) )<0)
+						if( (RecvMsgSz=recv(CliSock,buf,sizeof(buf),0) )<0)
 						{
 							perror("\nReceive fail");
 						}
@@ -108,11 +166,21 @@
 							else
 							{
 								strcpy(ClAddr,inet_ntoa(CliAddr.sin_addr));
+
 								printf("\nMessage received: %d bytes from %s",RecvMsgSz,ClAddr);
 								printf("\n");
 
 							}
 							printf("\nMessage %s",buf);
+							
+							command(buf);
+							
+							if(strcmp(choice,"register")==0)
+							{
+									REGISTER();
+
+							}
+							
 
 						}
 						close(CliSock);
@@ -124,9 +192,8 @@
 			{
 				if(strcasecmp(argv[1],"c")==0)
 				{
-					port=atoi(argv[2]);
-					while(1)
-					{
+					
+					
 					CliSock=socket(AF_INET,SOCK_STREAM,0);
 							if(CliSock<0)
 							{
@@ -141,133 +208,127 @@
 							CliAddr.sin_family=AF_INET;
 							CliAddr.sin_port=port;
 							CliAddr.sin_addr.s_addr=htonl(INADDR_ANY);
-
-							int i;
-	   				 		struct hostent *he;
-	    					struct in_addr **addr_list;
-							char s[30];
-							scanf("%s",s);
-	   
-	   						if ((he = gethostbyname(s)) == NULL) {  // get the host info
-	       					 herror("gethostbyname");
-	        				return 2;
-	    					}
-
-	    // print information about this host:
-	    printf("Official name is: %s\n", he->h_name);
-	    printf("    IP addresses: ");
-	    addr_list = (struct in_addr **)he->h_addr_list;
-	    for(i = 0; addr_list[i] != NULL; i++) {
-	        printf("%s ", inet_ntoa(*addr_list[i]));
-	    }
-		printf("\n");
-		char SeAddr[4];
-		strcpy(SeAddr,inet_ntoa(*addr_list[0]));
-		printf("\n%s\n",SeAddr);
-							
-							SAddr.sin_family=AF_INET;
-							SAddr.sin_port=htons(port);
-							inet_aton(SeAddr,&SAddr.sin_addr);
-
-
-
-					
-						printf("\nClient side: Enter message");
-						scanf("%s",buf);
-
-						if(connect(CliSock,(struct sockaddr *) &SAddr,sizeof(SAddr))<0)
+								while(1)
 						{
-							perror("\nConnection failed");
-							exit(1);
-						}
-						MsgLen=sizeof(buf);
-						if(send(CliSock,buf,MsgLen,0)<0)
-						{
-							perror("Sending failed");
-						}
-						DISPLAY(CliAddr.sin_addr,port);
-						printf("\n%s\n",buf);
-						close(CliSock);
-				/*printf("\n[PA]$ ");
-				scanf("%[^\n]s",comm);*/
+								scanf("%s",s);
+		   						if ((he = gethostbyname(s)) == NULL) {  // get the host info
+		       					 herror("gethostbyname");
+		        				return 2;
+		    					}
 
-						
-						
-		commLen=strlen(comm);
-		
-	   	for(i=0;i<=strlen(comm);i++)
-							{comm[i]=tolower(comm[i]);}
-						for(i=0;i<strlen(comm);i++)
-						{
-							if(spc_count==0)
-							{
-							while(comm[i]==' ')
-							{
-								spc_count++;
-								strncpy(choice,comm,i);
-								k=i+1;
+		    // print information about this host:
+
+		    printf("Official name is: %s\n", he->h_name);
+		    printf("    IP addresses: ");
+		    addr_list = (struct in_addr **)he->h_addr_list;
+		    for(i = 0; addr_list[i] != NULL; i++) {
+		        printf("%s ", inet_ntoa(*addr_list[i]));
+		    }
+			printf("\n");
+			char SeAddr[4];
+			strcpy(SeAddr,inet_ntoa(*addr_list[0]));
+			printf("\n%s\n",SeAddr);
 								
-								break;
+								SAddr.sin_family=AF_INET;
+								SAddr.sin_port=htons(port);
+								inet_aton(SeAddr,&SAddr.sin_addr);
+
+			if(connect(CliSock,(struct sockaddr *) &SAddr,sizeof(SAddr))<0)
+			{
+				perror("\nConnection failed");
+				exit(1);
+			}
+							printf("\nClient side: Enter message ");
+							scanf(" %[^\n]s",buf);
+							MsgLen=sizeof(buf);
+							printf("%d %s",MsgLen,buf);
+							if(send(CliSock,buf,MsgLen,0)<0)
+							{
+								perror("Sending failed");
 							}
-						  	
-							}
-							else
 							
-						    {
-							while(comm[i]==' ')
-								{	
+							printf("\n%sabcd\n",buf);
+							//close(CliSock);
+					/*printf("\n[PA]$ ");
+					scanf("%[^\n]s",comm);*/
+
+							
+							
+			commLen=strlen(comm);
+			
+		   	for(i=0;i<=strlen(comm);i++)
+								{comm[i]=tolower(comm[i]);}
+							for(i=0;i<strlen(comm);i++)
+							{
+								if(spc_count==0)
+								{
+								while(comm[i]==' ')
+								{
 									spc_count++;
-									strncpy(para1,comm+k,i-k);
+									strncpy(choice,comm,i);
+									k=i+1;
 									
-									strncpy(para2,comm+i+1,commLen-i-1);
 									break;
 								}
+							  	
+								}
+								else
+								
+							    {
+								while(comm[i]==' ')
+									{	
+										spc_count++;
+										strncpy(para1,comm+k,i-k);
+										
+										strncpy(para2,comm+i+1,commLen-i-1);
+										break;
+									}
+
+								}
+							}
+							if(spc_count==0)
+							{
+								strcpy(choice,comm);
+							}
+							else
+							{if(spc_count==1)
+								strncpy(para1,comm+k,i-k);
 
 							}
-						}
-						if(spc_count==0)
-						{
-							strcpy(choice,comm);
-						}
+							spc_count=0;
+
+								
+
+							if(strcmp(choice,"help")==0)
+									HELPF();
+								
+							
+							/*if(strcmp(choice,"creator")==0)
+								CREATOR();
+							
+							if(strcmp(choice,"display")==0)
+								DISPLAY(&CliAddr.sin_addr,port);*/
+
+							//if(strcmp(choice,"register")==0)
+								
+							/*if(strcmp(choice,"connect")==0)
+								CONNECT();
+							if(strcmp(ch,"list")==0)
+								
+							if(strcmp(ch,"terminate")==0)
+								if(strcmp(ch,"quit")==0)
+									if(strcmp(ch,"get")==0)
+										if(strcmp(ch,"put")==0)
+											if(strcmp(ch,"sync")==0)
+								
+								
 						else
-						{if(spc_count==1)
-							strncpy(para1,comm+k,i-k);
+						{
+							printf("\nBad Command... Type 'Help' for command list");
+						
 
+						}*/	
 						}
-						spc_count=0;
-
-							
-
-						if(strcmp(choice,"help")==0)
-								HELPF();
-							
-						
-						/*if(strcmp(choice,"creator")==0)
-							CREATOR();
-						
-						if(strcmp(choice,"display")==0)
-							DISPLAY(&CliAddr.sin_addr,port);*/
-
-						//if(strcmp(choice,"register")==0)
-							
-						/*if(strcmp(choice,"connect")==0)
-							CONNECT();
-						if(strcmp(ch,"list")==0)
-							
-						if(strcmp(ch,"terminate")==0)
-							if(strcmp(ch,"quit")==0)
-								if(strcmp(ch,"get")==0)
-									if(strcmp(ch,"put")==0)
-										if(strcmp(ch,"sync")==0)
-							
-							
-					else
-					{
-						printf("\nBad Command... Type 'Help' for command list");
-					
-
-					}*/	
-					}
 				}
 				else
 				{
@@ -287,13 +348,19 @@
 			printf("\n\t\t\tUBemail: vedangsh@buffalo.edu");
 		}
 		void REGISTER()
-		{
-
+		{				struct hostent *tmp; 
+							
+							lcount++;
+							lst[lcount].id=lcount;
+							tmp=gethostbyaddr(&CliAddr.sin_addr,sizeof(CliAddr.sin_addr),AF_INET);
+							strcpy(lst[lcount].hostname,tmp->h_name);
+							printf("%s",lst[lcount].hostname);
+							lst[lcount].c=1; //Connected to the server
 
 		}
 		void DISPLAY(struct in_addr Addr,unsigned short port)
 		{
-			printf("\n\nThis process is running on %s address.\nPort Number: %d ",inet_ntoa(Addr),htons(port));
+			printf("\n\nThis process is running on %s address.\nPort Number: %u ",inet_ntoa(Addr),port);
 		}
 		void HELPF()
 		{
