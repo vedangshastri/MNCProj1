@@ -29,14 +29,14 @@
 		unsigned short port;
 		int CliLen,commLen;
 		int i,spc_count=0,k;
-		char buf[1000];
-		char SendBuff[100],RecMsg[1000];
+		char SRbuf[1000],STbuf[1000];
+		char CTbuf[1000],CRbuf[1000];
 		char comm[40],para1[20],para2[20];							//1000 bytes buffer as mentioned in the project document
 		int RecvMsgSz;
-		int MsgLen,lcount;
+		int MsgLen,lcount=0;
 		char ClAddr[4];
 		void DISPLAY(struct in_addr Addr,unsigned short port);
-		int i;
+		
 	   				 		struct hostent *he;
 	    					struct in_addr **addr_list;
 							char s[30];
@@ -45,7 +45,7 @@
 	   	{
 	   		commLen=strlen(cmd);
 		
-	   	for(i=0;i<=strlen(cmd);i++)
+	   	for(i=0;i<strlen(cmd);i++)
 							{cmd[i]=tolower(cmd[i]);}
 						for(i=0;i<strlen(cmd);i++)
 						{
@@ -91,13 +91,18 @@
 		
 
 
-		memset(comm,0,30);
+		memset(comm,0,40);
 		memset(para1,0,20);
 		memset(para2,0,20);
+		for(i=0;i<5;i++)
+		{
+			memset(&lst[i],0,sizeof(struct list));
+		}
 
 						lst[0].id=1;
 						strcpy(lst[0].hostname,"timberlake.cse.buffalo.edu");
-						lst[0].p_no=3430;
+
+						
 						lst[0].c=1;
 		
 		//Create Socket
@@ -125,7 +130,7 @@
 				SAddr.sin_family=AF_INET;
 				SAddr.sin_port=htons(port);
 				SAddr.sin_addr.s_addr=htonl(INADDR_ANY);	//Assigning values to structaddr_in
-				
+				lst[0].p_no=port;
 				//Bind port number to IP addr
 				if(bind(SerSock,(struct sockaddr *) &SAddr, sizeof(SAddr))<0)
 				{
@@ -153,7 +158,7 @@
 					}
 					else
 					{
-						if( (RecvMsgSz=recv(CliSock,buf,sizeof(buf),0) )<0)
+						if( (RecvMsgSz=recv(CliSock,SRbuf,sizeof(SRbuf),0) )<0)
 						{
 							perror("\nReceive fail");
 						}
@@ -167,18 +172,18 @@
 							{
 								strcpy(ClAddr,inet_ntoa(CliAddr.sin_addr));
 
-								printf("\nMessage received: %d bytes from %s",RecvMsgSz,ClAddr);
-								printf("\n");
+								printf("\nMessage received: %d bytes capacity from %s\n ",RecvMsgSz,ClAddr);
+								
 
 							}
-							printf("\nMessage %s",buf);
+							setvbuf (stdout, NULL, _IONBF, 0);
 							
-							command(buf);
-							
+							command(SRbuf);
+							printf("\nMessage %s %s",SRbuf,choice);
 							if(strcmp(choice,"register")==0)
 							{
 									REGISTER();
-
+									
 							}
 							
 
@@ -218,8 +223,8 @@
 
 		    // print information about this host:
 
-		    printf("Official name is: %s\n", he->h_name);
-		    printf("    IP addresses: ");
+		    printf("Given Name: %s\n", he->h_name);
+		    printf("Associated IP addresses: ");
 		    addr_list = (struct in_addr **)he->h_addr_list;
 		    for(i = 0; addr_list[i] != NULL; i++) {
 		        printf("%s ", inet_ntoa(*addr_list[i]));
@@ -239,18 +244,29 @@
 				exit(1);
 			}
 							printf("\nClient side: Enter message ");
-							scanf(" %[^\n]s",buf);
-							MsgLen=sizeof(buf);
-							printf("%d %s",MsgLen,buf);
-							if(send(CliSock,buf,MsgLen,0)<0)
+							scanf(" %[^\n]s",CTbuf);
+							MsgLen=sizeof(CTbuf);
+							//printf("%d %s",MsgLen,CTbuf);
+							if(send(CliSock,CTbuf,MsgLen,0)<0)
 							{
 								perror("Sending failed");
 							}
+							MsgLen=sizeof(CRbuf);
+							if((MsgLen=recv(CliSock,CRbuf,MsgLen,0))<0)
+							{
+								perror("Receive problem");
+							}
+							if(MsgLen==0)
+							{
+								printf("\nConnection Closed");
+							}
+							else{
+								printf("\n%sabcd\n",CRbuf);
+							}
 							
-							printf("\n%sabcd\n",buf);
-							//close(CliSock);
-					/*printf("\n[PA]$ ");
-					scanf("%[^\n]s",comm);*/
+							close(CliSock);
+					printf("\n[PA]$ ");
+					scanf("%[^\n]s",comm);
 
 							
 							
@@ -350,13 +366,23 @@
 		void REGISTER()
 		{				struct hostent *tmp; 
 							
-							lcount++;
+							++lcount;
 							lst[lcount].id=lcount;
 							tmp=gethostbyaddr(&CliAddr.sin_addr,sizeof(CliAddr.sin_addr),AF_INET);
 							strcpy(lst[lcount].hostname,tmp->h_name);
-							printf("%s",lst[lcount].hostname);
+							lst[lcount].IPAddr;
+							
 							lst[lcount].c=1; //Connected to the server
-
+							strcpy(lst[lcount].IPAddr,inet_ntoa(CliAddr.sin_addr));
+							for(i=0;i<5;i++)
+							{
+							snprintf(CTbuf,sizeof(CTbuf),"List from Server: %u  %s  %s  %u ",lst[i].id,lst[i].hostname,lst[i].IPAddr,lst[i].p_no);
+							setvbuf (stdout, NULL, _IONBF, 0);
+							
+							if(send(SerSock,CTbuf,sizeof(CTbuf),0)<0)
+								perror("Sending error");
+							memset(CTbuf,0,sizeof(CTbuf));
+							}
 		}
 		void DISPLAY(struct in_addr Addr,unsigned short port)
 		{
@@ -364,83 +390,5 @@
 		}
 		void HELPF()
 		{
-			int help_choice,a=0;
-			printf("\n\t\t\tHelp Menu");
-			printf("\nFollowing commands are available for you");
-			printf("\n1.HELP\n2.CREATOR\n3.DISPLAY\n4.REGISTER\n5.CONNECT\n6.LIST\n7.TERMINATE\n8.GET\n9.QUIT\n10.PUT\n11.SYN\n0.EXIT");
-			while(1)
-			{	
-			printf("\n\nEnter a number for help about that command\n");
-			scanf("%d",&help_choice);
-			
-			switch(help_choice)
-			{
-				case 0:
-					return ;
-				case 1:
-					printf("\nHELP");
-					printf("\nDisplays help information about all the commands and a menu driven prompt");
-					break;
-				case 2:
-					printf("\nCREATOR");
-					printf("\nDisplays information about creator- Full Name, UBIT Name and UB email address");
-					break;
-				case 3:
-					printf("\nDISPLAY");
-					printf("\nDisplays the IP address of this process, and the port on which this process is listening for incoming connections");
-					break;
-				case 4:
-					printf("\nREGISTER");
-					printf("\nSYNTAX: REGISTER <server IP><port number>");
-					printf("\n\nThe REGISTER command takes 2 arguments.");
-					printf("The first argument is the IP address of the server and the second argument is the listening port of the server.");
-					printf("\n\nThis command is used by the client to register itself with the server and to get the IP and listening port numbers");
-					printf("\nof all other peers currently registered with the server.");
-					printf("\nThe first task of every host is to register itself with the server by sending the server a TCP message containing its listening port number.");
-					printf("\nThe server maintains a list of the IP address and the listening ports of all the registered clients.");
-					printf("This list is called as 'Server-IP-List'.\n Whenever a new host registers or a registered host exits, the server updates its Server-IP-List appropriately");
-					printf("and then sends this updated list to all the registered clients.");
-					printf("\nHosts always listen to such updates from the server and update their own local copy of the available peers."); 
-					printf("\nAny such update which is received by the host is be displayed by the client.");
-					printf("\nIf the host closes the TCP connection with the server for any reason then that host should be removed from the “Server-IP-List” and the server should promptly inform all the remaining hosts.");
-					break;
-				case 5:
-					printf("\nCONNECT");
-					printf("\nSYNTAX: CONNECT <destination> <port no>");
-					printf("\nThis command is used by the client to connect to another registered client. The destination IP address must be present in the server IP List.");
-					break;
-				case 6:
-					printf("\nLIST");
-					printf("\nDisplays a numbered list of all the connections this process is part of.");
-					printf("\n\nThis numbered list will include connections initiated by this process and connections initiated by other processes. The output displays the hostname, IP address and the listening port of all the peers the process is connected to. Also, this should include the server details.");
-					break;
-				case 7:
-					printf("\nTERMINATE");
-					printf("\nSYNTAX: TERMINATE <connetion id>");
-					printf("\n\nThis command will terminate the connection listed under the specified number when LIST is used to display all connections. Messages will be sent to both the nodes indiaction termination.");
-					break;
-				case 8:
-					printf("\nGET");
-					printf("\nSYNTAX: GET <connection id> <file>");
-					printf("\n\nThis command will download a file from one host specified in the command.");
-					break;
-				case 9:
-					printf("\nQUIT");
-					printf("\nClose all connections and terminate this process. When a host exits, the server unregisters the host and sends the updated “Server-IP-List” to all the clients.");
-					printf("Other hosts on receiving the updated list from the server should display the updated list.");
-					break;
-				case 10:
-					printf("\nPUT");
-					printf("\nSYNTAX:PUT <connection id> <file name>");
-					printf("\nRequests a file from a host other than a server. Request to server is not allowed");
-					break;
-				case 11:
-					printf("\nSYNC");
-					printf("\nThis command will make sure that all peers are up-to-date with their CONNECTED peers.");
-					break;
-				deafult:
-					printf("This is not a valid choice");
-			}
-			}
 			
 		}
